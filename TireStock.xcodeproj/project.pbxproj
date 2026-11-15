@@ -1,0 +1,268 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A100000000000000000000A9 /* TireStockApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A5 /* TireStockApp.swift */; };
+		A100000000000000000000AA /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A6 /* ContentView.swift */; };
+		A100000000000000000000AB /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A100000000000000000000A7 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A100000000000000000000A5 /* TireStockApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TireStockApp.swift; sourceTree = "<group>"; };
+		A100000000000000000000A6 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		A100000000000000000000A7 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A100000000000000000000A8 /* TireStock.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TireStock.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A100000000000000000000AD /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A100000000000000000000A2 = {
+			isa = PBXGroup;
+			children = (
+				A100000000000000000000A3 /* TireStock */,
+				A100000000000000000000A4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A100000000000000000000A3 /* TireStock */ = {
+			isa = PBXGroup;
+			children = (
+				A100000000000000000000A5 /* TireStockApp.swift */,
+				A100000000000000000000A6 /* ContentView.swift */,
+				A100000000000000000000A7 /* Assets.xcassets */,
+			);
+			path = TireStock;
+			sourceTree = "<group>";
+		};
+		A100000000000000000000A4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A100000000000000000000A8 /* TireStock.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A100000000000000000000A1 /* TireStock */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A100000000000000000000B4 /* Build configuration list for PBXNativeTarget "TireStock" */;
+			buildPhases = (
+				A100000000000000000000AC /* Sources */,
+				A100000000000000000000AD /* Frameworks */,
+				A100000000000000000000AE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TireStock;
+			productName = TireStock;
+			productReference = A100000000000000000000A8 /* TireStock.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A100000000000000000000A0 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					A100000000000000000000A1 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A100000000000000000000B3 /* Build configuration list for PBXProject "TireStock" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A100000000000000000000A2;
+			productRefGroup = A100000000000000000000A4 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A100000000000000000000A1 /* TireStock */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A100000000000000000000AE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000000000000000000AB /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A100000000000000000000AC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A100000000000000000000AA /* ContentView.swift in Sources */,
+				A100000000000000000000A9 /* TireStockApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A100000000000000000000AF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A100000000000000000000B0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		A100000000000000000000B1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "\U8f6e\U80ce\U5e93\U5b58";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "\U62cd\U6444\U8f6e\U80ce\U7167\U7247\U3001\U626b\U63cf\U89c4\U683c";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\U5f55\U5236\U89c6\U9891\U65f6\U4f7f\U7528\U9ea6\U514b\U98ce";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "\U4fdd\U5b58\U56fe\U7247\U5230\U76f8\U518c";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U9009\U62e9\U8f6e\U80ce\U7167\U7247\U4e0a\U4f20";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.qiang.tirestock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		A100000000000000000000B2 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "\U8f6e\U80ce\U5e93\U5b58";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_NSCameraUsageDescription = "\U62cd\U6444\U8f6e\U80ce\U7167\U7247\U3001\U626b\U63cf\U89c4\U683c";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\U5f55\U5236\U89c6\U9891\U65f6\U4f7f\U7528\U9ea6\U514b\U98ce";
+				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "\U4fdd\U5b58\U56fe\U7247\U5230\U76f8\U518c";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "\U9009\U62e9\U8f6e\U80ce\U7167\U7247\U4e0a\U4f20";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.qiang.tirestock;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A100000000000000000000B3 /* Build configuration list for PBXProject "TireStock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000000000000000000AF /* Debug */,
+				A100000000000000000000B0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A100000000000000000000B4 /* Build configuration list for PBXNativeTarget "TireStock" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A100000000000000000000B1 /* Debug */,
+				A100000000000000000000B2 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A100000000000000000000A0 /* Project object */;
+}
