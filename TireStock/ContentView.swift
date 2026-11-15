@@ -64,6 +64,22 @@ struct WebContainer: UIViewRepresentable {
         cfg.mediaTypesRequiringUserActionForPlayback = []
         cfg.websiteDataStore = .default()
 
+        // 注入原生分享桥：H5 里 window.TireApp.share(title, url) -> 系统分享面板（可转发到微信等）
+        let bridgeJS = """
+        (function(){
+          if (window.TireApp) return;
+          window.TireApp = {
+            share: function(title, url){
+              try { window.webkit.messageHandlers.tireShare.postMessage({title: title || '', url: url || ''}); } catch(e) {}
+            }
+          };
+        })();
+        """
+        cfg.userContentController.addUserScript(
+            WKUserScript(source: bridgeJS, injectionTime: .atDocumentStart, forMainFrameOnly: false)
+        )
+        cfg.userContentController.add(context.coordinator, name: "tireShare")
+
         let wv = WKWebView(frame: .zero, configuration: cfg)
         wv.navigationDelegate = context.coordinator
         wv.uiDelegate = context.coordinator
@@ -85,7 +101,7 @@ struct WebContainer: UIViewRepresentable {
 
     func updateUIView(_ uiView: WKWebView, context: Context) {}
 
-    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate {
+    final class Coordinator: NSObject, WKNavigationDelegate, WKUIDelegate, WKScriptMessageHandler {
         var parent: WebContainer
         weak var webView: WKWebView?
         private var observer: NSObjectProtocol?
@@ -206,6 +222,33 @@ struct WebContainer: UIViewRepresentable {
                      type: WKMediaCaptureType,
                      decisionHandler: @escaping (WKPermissionDecision) -> Void) {
             decisionHandler(.grant)
+        }
+
+        // 接收 H5 的分享请求 -> 系统分享面板
+        func userContentController(_ userContentController: WKUserContentController,
+                                  didReceive message: WKScriptMessage) {
+            guard message.name == "tireShare" else { return }
+            var title = "轮胎库存查询"
+            var urlStr = ""
+            if let d = message.body as? [String: Any] {
+                if let t = d["title"] as? String, !t.isEmpty { title = t }
+                urlStr = (d["url"] as? String) ?? ""
+            }
+            let items: [Any]
+            if let u = URL(string: urlStr), !urlStr.isEmpty {
+                items = [title, u]
+            } else {
+                items = [title]
+            }
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, let vc = self.topVC() else { return }
+                let av = UIActivityViewController(activityItems: items, applicationActivities: nil)
+                av.popoverPresentationController?.sourceView = self.webView
+                av.popoverPresentationController?.sourceRect = CGRect(
+                    x: (self.webView?.bounds.midX ?? 100),
+                    y: (self.webView?.bounds.midY ?? 100), width: 1, height: 1)
+                vc.present(av, animated: true)
+            }
         }
 
         private func topVC() -> UIViewController? {
