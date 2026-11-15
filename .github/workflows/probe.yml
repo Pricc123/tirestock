@@ -1,10 +1,19 @@
 name: Probe runner
 on: workflow_dispatch
 jobs:
-  probe:
+  linux:
     runs-on: ubuntu-latest
     steps:
-      - name: hello
-        run: |
-          echo "runner ok"
-          uname -a
+      - run: uname -a
+  mac13:
+    runs-on: macos-13
+    steps:
+      - run: sw_vers
+  mac14:
+    runs-on: macos-14
+    steps:
+      - run: sw_vers
+  mac15:
+    runs-on: macos-15
+    steps:
+      - run: sw_vers
