@@ -1,0 +1,599 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>轮胎库存管理</title>
+<link rel="icon" type="image/png" href="/favicon.png?v=20261018c">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=20261018c">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="轮胎库存">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#f5f7fa;--card:#fff;--fg:#1a1a2e;--sub:#64748b;--accent:#2563eb;--accent-hover:#1d4ed8;--border:#e2e8f0;--danger:#dc2626;--success:#16a34a;--warn:#d97706}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;padding:12px}
+.wrap{max-width:900px;margin:0 auto}
+.card{background:var(--card);border-radius:12px;padding:16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.card-header{display:flex;align-items:center;gap:8px;margin-bottom:12px}
+.card-title{font-size:16px;font-weight:600}
+.form-group{margin-bottom:12px}
+.form-label{display:block;font-size:13px;color:var(--sub);margin-bottom:4px}
+.form-input,.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;font-size:15px;background:#fff;color:var(--fg);outline:none}
+.form-input:focus,.form-select:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,235,.15)}
+.btn{display:inline-flex;align-items:center;justify-content:center;padding:10px 20px;border:none;border-radius:8px;font-size:15px;font-weight:500;cursor:pointer;transition:all .15s;gap:6px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--fg)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:6px 12px;font-size:13px}
+.btn-block{width:100%}
+.tabs{display:flex;gap:4px;margin-bottom:4px;background:#f1f5f9;border-radius:10px;padding:4px}
+.tab{flex:1;padding:10px;text-align:center;border-radius:8px;cursor:pointer;font-size:14px;font-weight:500;color:var(--sub);transition:all .15s}
+.tab.active{background:#fff;color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.tab-count{display:inline-block;background:#e2e8f0;color:var(--sub);padding:1px 6px;border-radius:10px;font-size:11px;margin-left:4px}
+.tab.active .tab-count{background:var(--accent);color:#fff}
+.stock-row{display:flex;align-items:center;padding:12px;border:1px solid var(--border);border-radius:10px;margin-bottom:8px;background:#fff}
+.dblrow{cursor:default;-webkit-user-select:none;user-select:none}
+.stock-info{flex:1;min-width:0}
+.stock-name{font-size:15px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stock-meta{font-size:12px;color:var(--sub)}
+.stock-qty{text-align:center;min-width:56px;margin:0 10px}
+.stock-qty .num{font-size:22px;font-weight:700;color:var(--accent)}
+.stock-qty .unit{font-size:11px;color:var(--sub)}
+.badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:500;white-space:nowrap}
+.badge-success{background:#dcfce7;color:#166534}
+.badge-warn{background:#fef9c3;color:#854d0e}
+.badge-danger{background:#fee2e2;color:#991b1b}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center;z-index:100;padding:16px}
+.modal{background:#fff;border-radius:14px;padding:20px;width:100%;max-width:420px;max-height:85vh;overflow-y:auto}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.modal-title{font-size:17px;font-weight:600}
+.modal-close{background:none;border:none;font-size:20px;cursor:pointer;color:var(--sub);padding:4px;line-height:1}
+.hist-item{display:flex;align-items:center;padding:10px;border-bottom:1px solid var(--border);font-size:13px}
+.hist-item:last-child{border-bottom:none}
+.hist-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-right:10px;flex-shrink:0}
+.hist-in{background:#dcfce7;color:#166534}
+.hist-out{background:#fee2e2;color:#991b1b}
+.hist-info{flex:1;min-width:0}
+.hist-time{font-size:11px;color:var(--sub);margin-top:2px}
+.search-bar{display:flex;gap:8px;margin-bottom:12px}
+.search-bar input{flex:1}
+.search-bar select{width:110px;flex-shrink:0;-webkit-appearance:none;appearance:none;background:#fff url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%2364748b' stroke-width='1.6' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 7px center;padding-right:22px}
+.empty{text-align:center;padding:40px 20px;color:var(--sub)}
+.empty-icon{font-size:48px;margin-bottom:12px}
+.low-stock{border-color:#fbbf24!important}
+.out-of-stock{opacity:.6}
+input[type=file]{display:none}
+.camera-btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px;background:#f0f9ff;border:1px dashed var(--accent);border-radius:8px;color:var(--accent);font-size:14px;cursor:pointer;width:100%;margin-bottom:6px}
+.camera-btn:active{background:#e0f2fe}
+.ocr-msg{font-size:12px;margin-top:4px;min-height:16px;display:none}
+.ocr-msg.show{display:block}
+.ocr-msg.ok{color:var(--success)}
+.ocr-msg.err{color:var(--danger)}
+.ocr-msg.warn{color:var(--warn)}
+.ocr-msg.loading{color:var(--accent)}
+.spinner{display:inline-block;width:13px;height:13px;border:2px solid currentColor;border-top-color:transparent;border-radius:50%;animation:spin .7s linear infinite;vertical-align:-2px;margin-right:4px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.usticky{position:-webkit-sticky;position:sticky;top:0;z-index:5;background:#fff;margin:-16px -16px 12px;padding:16px 16px 10px;border-bottom:1px solid var(--border);border-radius:12px 12px 0 0;box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.sheet-overlay{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(15,23,42,.45);z-index:999;display:flex;align-items:flex-end;justify-content:center}
+.sheet{width:100%;max-width:520px;background:#fff;border-radius:18px 18px 0 0;padding:8px 12px calc(14px + env(safe-area-inset-bottom));box-shadow:0 -8px 24px rgba(0,0,0,.15);animation:sheetUp .22s ease-out}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet-title{text-align:center;font-size:13px;color:var(--sub);padding:14px 0 6px;font-weight:500}
+.sheet-item{display:flex;align-items:center;gap:12px;padding:15px 12px;border-radius:12px;font-size:16px;font-weight:500;color:var(--fg);text-decoration:none;cursor:pointer}
+.sheet-item:active{background:#f1f5f9}
+.sheet-item .si-ico{font-size:22px;width:28px;text-align:center}
+.sheet-item .si-txt{display:flex;flex-direction:column;gap:3px}
+.sheet-item em{font-style:normal;font-size:12px;color:var(--sub);font-weight:400}
+.sheet-cancel{margin-top:10px;text-align:center;padding:14px;border-radius:12px;background:#f1f5f9;font-size:16px;font-weight:600;color:var(--fg);cursor:pointer}
+.share-box{padding:2px 4px 0}
+.share-qr{display:block;width:168px;height:168px;margin:8px auto 10px;border-radius:10px;border:1px solid var(--border);background:#fff}
+.share-hint{font-size:12px;color:var(--sub);text-align:center;line-height:1.6;margin-bottom:12px}
+.share-url{display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--sub);word-break:break-all;text-align:left;line-height:1.4}
+.share-url b{margin-left:auto;color:var(--accent);font-size:13px;white-space:nowrap;cursor:pointer;font-weight:600}
+.share-actions{display:flex;gap:10px}
+.share-btn{flex:1;padding:13px 10px;border-radius:12px;border:none;font-size:15px;font-weight:600;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.share-btn.main{background:var(--accent);color:#fff}
+.share-btn.ghost{background:#f1f5f9;color:var(--fg);border:1px solid var(--border)}
+</style>
+</head>
+<body>
+<div class="wrap" id="app"></div>
+<script>
+const API=location.origin;
+let role=null,tab='stock',search='',filterWh='',filter2nd=false,_cache={items:null,hist:null,whs:null,brands:null},_itemsPromise=null;
+const DEFAULT_WH='万通仓';
+function whName(it){return it.warehouse||DEFAULT_WH}
+function whOptions(sel){const whs=_cache.whs||[DEFAULT_WH];return whs.map(w=>'<option value="'+esc(w)+'"'+(w===sel?' selected':'')+'>'+esc(w)+'</option>').join('')}
+// 轮胎规格排序键：返回 [尺寸(轮毂), 胎宽, 扁平比]
+function tireKey(sz){
+ const s=(sz||'').toString().toUpperCase();
+ let m=s.match(/(\d{3})\s*[/／\-]\s*(\d{2,3})\s*Z?(?:RF|R)?\s*0?(\d{2})(?!\d)/);
+ if(m)return [+m[3],+m[1],+m[2]];
+ const d=s.replace(/\D/g,'');
+ if(d.length>=7){const w=+d.slice(0,3),rim=+d.slice(-2),ratio=+d.slice(3,d.length-2);return [rim,w,ratio||0];}
+ return [999,+(d.slice(0,3)||0),0];
+}
+function tireCmp(a,b){const A=tireKey(a.size),B=tireKey(b.size);
+ for(let i=0;i<3;i++){if(A[i]!==B[i])return A[i]-B[i];}
+ return (a.brand||'').localeCompare(b.brand||'')||(a.pattern||'').localeCompare(b.pattern||'');}
+function sortItems(a){return a.sort((x,y)=>(y.lastUpdated||y.createdAt||0)-(x.lastUpdated||x.createdAt||0))}
+function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
+function toast(msg){
+  let t=document.getElementById('__toast');
+  if(!t){t=document.createElement('div');t.id='__toast';
+    t.style.cssText='position:fixed;left:50%;bottom:18%;transform:translateX(-50%);background:rgba(20,28,40,.92);color:#fff;padding:12px 20px;border-radius:10px;font-size:14px;z-index:9999;max-width:86%;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.25);opacity:0;transition:opacity .2s';
+    document.body.appendChild(t);}
+  t.textContent=msg;t.style.opacity='1';clearTimeout(t._tm);
+  t._tm=setTimeout(()=>{t.style.opacity='0';},2200);
+}
+
+async function apiGet(p){const r=await fetch(API+p);if(!r.ok)throw new Error('HTTP '+r.status);return r.json()}
+async function apiPost(d){const r=await fetch(API+'/api/inventory',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(d)});return r.json()}
+async function getItems(force){if(force||!_cache.items){const r=await apiGet('/api/inventory');_cache.items=r.items||[];_cache.whs=r.warehouses&&r.warehouses.length?r.warehouses:[DEFAULT_WH];_cache.brands=r.brands&&r.brands.length?r.brands:[...new Set(_cache.items.map(i=>i.brand).filter(Boolean))].sort()}_cache.items.sort((a,b)=>(b.lastUpdated||b.createdAt||0)-(a.lastUpdated||a.createdAt||0));return _cache.items}
+function brandOptions(sel){const bs=_cache.brands||[];return bs.map(b=>'<option value="'+esc(b)+'"'+(b===sel?' selected':'')+'>'+esc(b)+'</option>').join('')}
+function brandFieldVal(){return(document.getElementById('in_brand')||{}).value||''}
+async function getHistory(force){if(force||!_cache.hist){const r=await apiGet('/api/history');_cache.hist=r.history||[]}return _cache.hist}
+
+
+// ---------- 渲染 ----------
+async function render(){
+  const app=document.getElementById('app');
+  if(role==='admin')await renderAdmin(app);
+  else await renderUser(app);
+}
+function logout(){role=null;_cache={items:null,hist:null};render()}
+
+async function renderAdmin(app){
+  const items=await getItems();
+  const total=items.length;
+  let h='<div class="card"><div class="card-header"><span style="font-size:22px">🛞</span><span class="card-title" style="flex:1">轮胎库存管理</span><span style="text-align:right;font-size:11px;line-height:1.45;color:#64748b;white-space:nowrap;margin-right:8px">A任大小补胎搭电路空调<br><a href="tel:17754185168" style="color:var(--accent);font-size:14px;font-weight:700;text-decoration:none">17754185168</a></span><button class="btn btn-outline btn-sm" onclick="logout()">退出</button></div>';
+  h+='<div class="tabs">'+tabBtn('stock','库存',total)+tabBtn('in','入库',null)+tabBtn('out','出库',null)+tabBtn('hist','记录',null)+'</div></div>';
+  h+='<div id="tab-content"></div>';
+  app.innerHTML=h;
+  await renderTabContent(document.getElementById('tab-content'),items);
+}
+function tabBtn(id,label,count){
+  return '<div class="tab'+(tab===id?' active':'')+'" onclick="switchTab(\''+id+'\')">'+label+(count!==null?'<span class="tab-count">'+count+'</span>':'')+'</div>';
+}
+async function switchTab(t){
+  tab=t;
+  const items=await getItems();
+  document.querySelector('.tabs').innerHTML=tabBtn('stock','库存',items.length)+tabBtn('in','入库',null)+tabBtn('out','出库',null)+tabBtn('hist','记录',null);
+  await renderTabContent(document.getElementById('tab-content'),items);
+}
+async function renderTabContent(tc,items){
+  if(tab==='stock')renderStock(tc,items);
+  else if(tab==='in')renderIn(tc);
+  else if(tab==='out')renderOut(tc,items);
+  else await renderHist(tc);
+}
+
+// 同 型号+品牌+花纹 跨仓库合并一行：各仓条数 + 共几条 + 售价
+function listMerged(list,f,editable,emptyMsg){
+  const groups=[];const gmap={};
+  for(const it of f){const k=[it.size,it.brand||'',it.pattern||''].join('\u0001');
+    if(!gmap[k]){gmap[k]={recs:[]};groups.push(gmap[k]);}
+    gmap[k].recs.push(it);}
+  if(!groups.length){list.innerHTML='<div class="empty"><div class="empty-icon">📦</div>'+emptyMsg+'</div>';return}
+  let x='';
+  for(const g of groups){
+    const head=g.recs[0];
+    const tot=g.recs.reduce((a,r)=>a+(+r.qty||0),0);
+    const price=g.recs.map(r=>+r.retailPrice||0).find(v=>v>0)||0;
+    x+='<div class="stock-row'+(tot===0?' out-of-stock':'')+(editable?' dblrow':'')+'"'+(editable?' data-eid="'+head.id+'"':'')+'>';
+    var whQty={};g.recs.forEach(function(r){var w=whName(r);whQty[w]=(whQty[w]||0)+(+r.qty||0);});
+    var whTxt=Object.keys(whQty).filter(function(w){return whQty[w]>0;}).map(function(w){return w+' '+whQty[w]+(head.unit||'条');}).join(' · ');
+    x+='<div class="stock-info"><div class="stock-name">'+esc(head.size)+'</div><div class="stock-meta">'+[head.brand,head.pattern].filter(Boolean).join(' · ')+'</div>'+(whTxt?'<div style="font-size:11px;color:#2563eb;margin-top:3px;font-weight:600">'+esc(whTxt)+'</div>':'')+'</div>';
+    x+='<div class="stock-qty" style="width:52px;flex:0 0 52px;text-align:right"><div class="num">'+tot+'</div><div class="unit">'+(head.unit||'条')+'</div></div>';
+    x+='<div style="width:64px;flex:0 0 64px;text-align:right;font-size:15px;font-weight:700;color:#ea580c;white-space:nowrap">'+(price?'¥'+price:'—')+'</div></div>';
+  }
+  list.innerHTML=x;
+}
+function uniqSorted(arr){return [...new Set(arr.filter(v=>v&&v<900))].sort((a,b)=>a-b);}
+function sizeSelects(items,sel){
+  const ks=items.map(i=>tireKey(i.size));
+  const rims=uniqSorted(ks.map(k=>k[0])),ws=uniqSorted(ks.map(k=>k[1])),rs=uniqSorted(ks.map(k=>k[2]));
+  const opts=(arr,ph,suffix)=>'<option value="">'+ph+'</option>'+arr.map(v=>'<option value="'+v+'"'+(sel===v?' selected':'')+'>'+v+suffix+'</option>').join('');
+  return '<select class="form-select" id="f_w" style="flex:1">'+opts(ws,'胎宽','')+'</select>'
+       + '<select class="form-select" id="f_r" style="flex:1">'+opts(rs,'扁平比','')+'</select>'
+       + '<select class="form-select" id="f_d" style="flex:1">'+opts(rims,'尺寸','寸')+'</select>';
+}
+function renderStock(container,items){
+  const whs=_cache.whs||[DEFAULT_WH];
+  let h='<div class="card"><div class="search-bar" style="gap:6px">'+sizeSelects(items,0)+'<span id="btn2nd" style="flex:1;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:10px 12px;font-size:15px;font-weight:400;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--fg);cursor:pointer;user-select:none;-webkit-user-select:none">二手</span></div>';
+  h+='<div id="whChips" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:2px 0 6px"></div>';
+  h+='<div style="font-size:11px;color:#94a3b8;margin-bottom:8px">双击编辑 · 左滑出库 · 右滑入库</div>';
+  h+='<div id="stockList"></div></div>';
+  container.innerHTML=h;
+  function paint2nd(){const b=document.getElementById('btn2nd');if(!b)return;if(filter2nd){b.style.borderColor='#ea580c';b.style.background='#ea580c';b.style.color='#fff';}else{b.style.borderColor='';b.style.background='#fff';b.style.color='';}}
+  function draw(){
+    paint2nd();
+    const fw=parseInt(document.getElementById('f_w').value)||0;
+    const fr=parseInt(document.getElementById('f_r').value)||0;
+    const fd=parseInt(document.getElementById('f_d').value)||0;
+    const wf=filterWh||'';
+    const chip=(label,n,sel)=>'<span data-wh="'+esc(label)+'" style="font-size:12px;border-radius:14px;padding:4px 11px;cursor:pointer;border:1px solid '+(sel?'var(--accent)':'#e2e8f0')+';background:'+(sel?'var(--accent)':'#fff')+';color:'+(sel?'#fff':'#475569')+'">'+label+' '+n+'条</span>';
+    let ch=chip('全部',items.reduce((a,i)=>a+(+i.qty||0),0),!wf);
+    for(const w of whs){const n=items.filter(i=>whName(i)===w).reduce((a,i)=>a+(+i.qty||0),0);ch+=chip(w,n,wf===w);}
+    document.getElementById('whChips').innerHTML=ch;
+    let f=items;
+    if(fw||fr||fd)f=f.filter(i=>{const k=tireKey(i.size);return(!fw||k[1]===fw)&&(!fr||k[2]===fr)&&(!fd||k[0]===fd);});
+    if(wf)f=f.filter(i=>whName(i)===wf);
+    if(filter2nd)f=f.filter(i=>(i.brand||'')==='二手');
+    listMerged(document.getElementById('stockList'),f.slice().sort(tireCmp),true,'无匹配结果');
+  }
+  ['f_w','f_r','f_d'].forEach(id=>document.getElementById(id).addEventListener('change',draw));
+  document.getElementById('btn2nd').addEventListener('click',()=>{filter2nd=!filter2nd;draw();});
+  document.getElementById('whChips').addEventListener('click',e=>{
+    const t=e.target.closest('[data-wh]');if(!t)return;
+    filterWh=t.getAttribute('data-wh')==='全部'?'':t.getAttribute('data-wh');
+    draw();
+  });
+  // 双击 / 连续两次点按 打开编辑
+  let lastTap=0,lastEid=null;
+  container.addEventListener('dblclick',e=>{
+    const row=e.target.closest('.dblrow');if(row)showEdit(row.getAttribute('data-eid'));
+  });
+  container.addEventListener('touchend',e=>{
+    const row=e.target.closest('.dblrow');if(!row)return;
+    const now=Date.now(),eid=row.getAttribute('data-eid');
+    if(now-lastTap<320&&eid===lastEid){e.preventDefault();showEdit(eid);lastTap=0;lastEid=null;}
+    else{lastTap=now;lastEid=eid;}
+  },{passive:false});
+  // 滑动：左滑出库 / 右滑入库
+  let sx=0,sy=0,sRow=null,decided=null,moved=false;
+  container.addEventListener('touchstart',e=>{
+    const t=e.touches[0];sx=t.clientX;sy=t.clientY;sRow=e.target.closest('.dblrow');decided=null;moved=false;
+  },{passive:true});
+  container.addEventListener('touchmove',e=>{
+    if(!sRow)return;const t=e.touches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(!decided){if(Math.abs(dx)<12&&Math.abs(dy)<12)return;
+      if(Math.abs(dx)>Math.abs(dy)){decided='h';moved=true;}else{decided='v';sRow=null;return;}}
+    if(decided==='h'){e.preventDefault();sRow.style.background=dx<0?'#fef2f2':'#eff6ff';}
+  },{passive:false});
+  container.addEventListener('touchend',e=>{
+    if(sRow&&decided==='h'&&moved){
+      const t=e.changedTouches[0],dx=t.clientX-sx;
+      const eid=sRow.getAttribute('data-eid');sRow.style.background='';
+      if(Math.abs(dx)>60){dx<0?quickOut(eid):quickIn(eid);}
+    }
+    if(sRow)sRow.style.background='';sRow=null;decided=null;
+  });
+  draw();
+}
+function manageWh(){
+  const whs=(_cache.whs||[DEFAULT_WH]).slice();
+  let rows=whs.map((w,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input class="form-input wh-edit" data-i="'+i+'" value="'+esc(w)+'" style="flex:1"><span onclick="renameWh('+i+',this)" style="color:var(--accent);cursor:pointer;font-size:13px">改名</span><span onclick="deleteWh('+i+')" style="color:var(--danger);cursor:pointer;font-size:13px">删除</span></div>').join('');
+  showModal('<div class="modal-header"><span class="modal-title">仓库管理</span><button class="modal-close" onclick="hideModal()">✕</button></div>'+
+    '<div style="font-size:12px;color:var(--sub);margin-bottom:10px">同型号不同仓库分别记数；有库存的仓库不能删除。</div>'+
+    '<div id="whRows">'+rows+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:6px"><input class="form-input" id="newWh" placeholder="新仓库名称" style="flex:1"><button class="btn btn-primary" onclick="addWh()">新增</button></div>');
+  document.getElementById('newWh').addEventListener('keydown',e=>{if(e.key==='Enter')addWh()});
+}
+async function addWh(){
+  const el=document.getElementById('newWh');const name=el.value.trim();if(!name)return;
+  const r=await apiPost({action:'wh_add',name});
+  if(r.errorCode===0){_cache.whs=r.warehouses;_cache.items=null;window.__selWh=name;hideModal();toast('已新增仓库 '+name);render()}else alert(r.message||'失败');
+}
+function renameWh(i,btn){
+  const inp=document.querySelectorAll('.wh-edit')[i];const old=(_cache.whs||[])[i];const name=inp.value.trim();
+  if(!name||name===old)return;
+  apiPost({action:'wh_rename',old,name}).then(r=>{if(r.errorCode===0){_cache.whs=r.warehouses;_cache.items=null;window.__selWh=name;hideModal();toast('已改名');render()}else alert(r.message||'失败')});
+}
+function deleteWh(i){
+  const name=(_cache.whs||[])[i];
+  if(!confirm('确定删除仓库「'+name+'」？（该仓有库存时无法删除）'))return;
+  apiPost({action:'wh_delete',name}).then(r=>{if(r.errorCode===0){if(filterWh===name)filterWh='';if(window.__selWh===name)window.__selWh='';_cache.whs=r.warehouses;_cache.items=null;hideModal();toast('已删除');render()}else alert(r.message||'失败')});
+}
+function manageBrand(){
+  const bs=(_cache.brands||[]).slice();
+  const rows=bs.map((b,i)=>'<div style="display:flex;gap:8px;align-items:center;margin-bottom:8px"><input class="form-input brand-edit" data-i="'+i+'" value="'+esc(b)+'" style="flex:1"><span onclick="renameBrand('+i+')" style="color:var(--accent);cursor:pointer;font-size:13px">改名</span><span onclick="deleteBrand('+i+')" style="color:var(--danger);cursor:pointer;font-size:13px">删除</span></div>').join('');
+  showModal('<div class="modal-header"><span class="modal-title">品牌管理</span><button class="modal-close" onclick="hideModal()">✕</button></div>'+
+    '<div style="font-size:12px;color:var(--sub);margin-bottom:10px">改名会同步更新已有库存；删除品牌不影响已登记的库存记录。</div>'+
+    '<div id="brandRows" style="max-height:50vh;overflow:auto">'+rows+'</div>'+
+    '<div style="display:flex;gap:8px;margin-top:6px"><input class="form-input" id="newBrand" placeholder="新品牌名称" style="flex:1"><button class="btn btn-primary" onclick="addBrand()">新增</button></div>');
+  document.getElementById('newBrand').addEventListener('keydown',e=>{if(e.key==='Enter')addBrand()});
+}
+async function addBrand(){
+  const el=document.getElementById('newBrand');const name=el.value.trim();if(!name)return;
+  const r=await apiPost({action:'brand_add',name});
+  if(r.errorCode===0){_cache.brands=r.brands;window.__selBrand=name;_cache.items=null;hideModal();toast('已新增品牌 '+name);render()}else alert(r.message||'失败');
+}
+function renameBrand(i){
+  const inp=document.querySelectorAll('.brand-edit')[i];const old=(_cache.brands||[])[i];const name=inp.value.trim();
+  if(!name||name===old)return;
+  apiPost({action:'brand_rename',old,name}).then(r=>{if(r.errorCode===0){_cache.brands=r.brands;window.__selBrand=name;_cache.items=null;hideModal();toast('已改名');render()}else alert(r.message||'失败')});
+}
+function deleteBrand(i){
+  const name=(_cache.brands||[])[i];
+  if(!confirm('确定删除品牌「'+name+'」？（不影响已登记库存）'))return;
+  apiPost({action:'brand_delete',name}).then(r=>{if(r.errorCode===0){if(window.__selBrand===name)window.__selBrand='';_cache.brands=r.brands;hideModal();toast('已删除品牌');render()}else alert(r.message||'失败')});
+}
+
+function renderIn(container){
+  const whs=_cache.whs||[DEFAULT_WH];
+  let h='<div class="card"><div class="card-title" style="margin-bottom:14px">📥 入库登记</div>';
+  const selIn=(window.__selWh&&whs.includes(window.__selWh))?window.__selWh:(whs[0]||DEFAULT_WH);
+  h+='<div class="form-group"><label class="form-label">入库仓库 *</label><div style="display:flex;gap:8px"><select class="form-select" id="in_wh" style="flex:1">'+whOptions(selIn)+'</select><button type="button" class="btn btn-outline" style="white-space:nowrap" onclick="manageWh()">⚙ 管理仓库</button></div></div>';
+  h+='<div class="form-group"><label class="form-label">轮胎型号 *</label><input class="form-input" id="in_size" placeholder="例：215/60R16"></div>';
+  h+='<div class="form-group"><label class="form-label">品牌</label><div style="display:flex;gap:8px"><select class="form-select" id="in_brand" style="flex:1"><option value="">不填/其他</option>'+brandOptions(window.__selBrand||'')+'</select><button type="button" class="btn btn-outline" style="white-space:nowrap" onclick="manageBrand()">⚙ 管理品牌</button></div></div>';
+  h+='<div class="form-group"><label class="form-label">花纹</label><input class="form-input" id="in_pattern" placeholder="例：K717"></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">数量 *</label><input class="form-input" id="in_qty" type="number" value="1" min="1"></div><div class="form-group"><label class="form-label">单位</label><input class="form-input" id="in_unit" value="条"></div></div>';
+  h+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">进价</label><input class="form-input" id="in_cost" type="number" step="0.01" oninput="document.getElementById(\'in_retail\').value=(parseFloat(this.value)||0)+30"></div><div class="form-group"><label class="form-label">售价（进价+30）</label><input class="form-input" id="in_retail" type="number" step="0.01"></div></div>';
+  h+='<div class="form-group"><label class="form-label">供应商</label><input class="form-input" id="in_supplier" placeholder="供应商名称"></div>';
+  h+='<div class="form-group"><label class="form-label">备注</label><input class="form-input" id="in_note" placeholder="可选"></div>';
+  h+='<button class="btn btn-primary btn-block" onclick="doInbound()">确认入库</button></div>';
+  container.innerHTML=h;
+}
+
+function renderOut(container,items){
+  const whs=_cache.whs||[DEFAULT_WH];
+  const selWh=whs[0]||DEFAULT_WH;
+  let h='<div class="card"><div class="card-title" style="margin-bottom:14px">📤 出库登记</div>';
+  h+='<div class="form-group"><label class="form-label">出库仓库 *</label><select class="form-select" id="out_wh">'+whOptions(selWh)+'</select></div>';
+  h+='<div class="form-group"><label class="form-label">选择轮胎 *</label><select class="form-select" id="out_id"></select></div>';
+  h+='<div class="form-group"><label class="form-label">出库数量 *</label><input class="form-input" id="out_qty" type="number" value="1" min="1"></div>';
+  h+='<div class="form-group"><label class="form-label">备注</label><input class="form-input" id="out_note" placeholder="客户/用途等"></div>';
+  h+='<button class="btn btn-primary btn-block" onclick="doOutbound()">确认出库</button></div>';
+  container.innerHTML=h;
+  function fillItems(){
+    const w=document.getElementById('out_wh').value;
+    const avail=items.filter(i=>i.qty>0&&whName(i)===w);
+    const sel=document.getElementById('out_id');
+    if(!avail.length){sel.innerHTML='<option value="">该仓库无可用库存</option>';return}
+    sel.innerHTML='<option value="">-- 请选择 --</option>'+avail.map(i=>'<option value="'+i.id+'">'+i.size+(i.brand?' - '+i.brand:'')+(i.pattern?' '+i.pattern:'')+' (库存'+i.qty+')</option>').join('');
+  }
+  document.getElementById('out_wh').addEventListener('change',fillItems);
+  fillItems();
+}
+
+async function doInbound(){
+  const size=document.getElementById('in_size').value.trim();
+  const qty=parseInt(document.getElementById('in_qty').value)||0;
+  const warehouse=(document.getElementById('in_wh')||{}).value||DEFAULT_WH;
+  if(!size){alert('请输入轮胎型号');return}
+  if(qty<=0){alert('数量必须大于0');return}
+  try{
+    const r=await apiPost({action:'inbound',size,warehouse,brand:brandFieldVal(),pattern:document.getElementById('in_pattern').value.trim(),qty,unit:document.getElementById('in_unit').value.trim(),costPrice:parseFloat(document.getElementById('in_cost').value)||0,retailPrice:parseFloat(document.getElementById('in_retail').value)||0,supplier:document.getElementById('in_supplier').value.trim(),note:document.getElementById('in_note').value.trim()});
+    if(r.errorCode===0){_cache.items=null;_cache.hist=null;alert('✅ 入库成功');tab='stock';render()}else alert(r.message||'失败');
+  }catch(e){alert('失败：'+e.message)}
+}
+async function doOutbound(){
+  const id=document.getElementById('out_id').value;
+  const qty=parseInt(document.getElementById('out_qty').value)||0;
+  if(!id){alert('请选择轮胎');return}
+  if(qty<=0){alert('数量必须大于0');return}
+  try{
+    const r=await apiPost({action:'outbound',id,qty,note:document.getElementById('out_note').value.trim()});
+    if(r.errorCode===0){_cache.items=null;_cache.hist=null;alert('✅ 出库成功');tab='stock';render()}else alert(r.message||'失败');
+  }catch(e){alert('失败：'+e.message)}
+}
+
+// 找到某条记录所属的整组（同 型号+品牌+花纹）
+function groupOf(id){
+  const all=_cache.items||[],it=all.find(i=>i.id===id);if(!it)return null;
+  return all.filter(i=>(i.size||'')===(it.size||'')&&(i.brand||'')===(it.brand||'')&&(i.pattern||'')===(it.pattern||''));
+}
+let _editingId=null;
+function showEdit(id){
+  const g=groupOf(id);if(!g)return;_editingId=id;
+  const head=g[0];
+  const whs=_cache.whs||[DEFAULT_WH];
+  let rows='';
+  for(const w of whs){
+    const rec=g.find(r=>whName(r)===w);
+    const q=rec?(+rec.qty||0):'';
+    rows+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="flex:1">'+esc(w)+'</span><input class="form-input eqty" data-wh="'+esc(w)+'" type="number" inputmode="numeric" value="'+q+'" style="width:110px;text-align:right" placeholder="0"></div>';
+  }
+  showModal(
+    '<div class="modal-header"><span class="modal-title">编辑轮胎</span><button class="modal-close" onclick="hideModal()">✕</button></div>'+
+    '<div class="form-group"><label class="form-label">型号</label><input class="form-input" id="e_size" value="'+esc(head.size)+'"></div>'+
+    '<div class="form-group"><label class="form-label">品牌</label><select class="form-select" id="e_brand"><option value="">不填/其他</option>'+brandOptions(head.brand||'')+'</select></div>'+
+    '<div class="form-group"><label class="form-label">花纹</label><input class="form-input" id="e_pattern" value="'+esc(head.pattern||'')+'"></div>'+
+    '<div class="form-group"><label class="form-label">各仓库数量</label>'+rows+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">进价</label><input class="form-input" id="e_cost" type="number" step="0.01" value="'+(head.costPrice||0)+'"></div><div class="form-group"><label class="form-label">售价</label><input class="form-input" id="e_retail" type="number" step="0.01" value="'+(head.retailPrice||0)+'"></div></div>'+
+    '<div class="form-group"><label class="form-label">供应商</label><input class="form-input" id="e_supplier" value="'+esc(head.supplier||'')+'"></div>'+
+    '<div style="display:flex;gap:10px;margin-top:16px"><button class="btn btn-primary" style="flex:1" onclick="saveEditGroup()">保存</button><button class="btn btn-danger" style="flex:1" onclick="deleteGroup()">删除全部</button></div>'
+  );
+}
+async function saveEditGroup(){
+  const id=_editingId,g=groupOf(id);if(!g)return;
+  const size=document.getElementById('e_size').value.trim();
+  if(!size){alert('型号不能为空');return}
+  const base={
+    brand:document.getElementById('e_brand').value.trim(),
+    pattern:document.getElementById('e_pattern').value.trim(),
+    costPrice:parseFloat(document.getElementById('e_cost').value)||0,
+    retailPrice:parseFloat(document.getElementById('e_retail').value)||0,
+    supplier:document.getElementById('e_supplier').value.trim(),
+    unit:g[0].unit||'条'
+  };
+  const wh=[];
+  document.querySelectorAll('.eqty').forEach(inp=>{
+    wh.push({warehouse:inp.getAttribute('data-wh'),qty:parseInt(inp.value)||0});
+  });
+  try{
+    const r=await apiPost({action:'group_save',id,size,base,wh});
+    if(r.errorCode===0){_cache.items=null;hideModal();render()}else alert(r.message||'保存失败');
+  }catch(e){alert(e.message)}
+}
+async function deleteGroup(){
+  const id=_editingId,g=groupOf(id);if(!g)return;
+  if(!confirm('确定删除该型号在全部仓库的 '+(g.length)+' 条记录？'))return;
+  try{
+    for(const r of g){await apiPost({action:'delete',id:r.id});}
+    _cache.items=null;hideModal();render();
+  }catch(e){alert(e.message)}
+}
+// 左滑出库
+function quickOut(id){
+  const g=groupOf(id);if(!g)return;const head=g[0];
+  const avail=g.filter(r=>(+r.qty||0)>0);
+  if(!avail.length){toast('该型号暂无库存');return;}
+  const opts=avail.map(r=>'<option value="'+r.id+'">'+esc(whName(r))+'（'+r.qty+'条）</option>').join('');
+  showModal('<div class="modal-header"><span class="modal-title">📤 出库 · '+esc(head.size)+'</span><button class="modal-close" onclick="hideModal()">✕</button></div>'+
+    '<div class="form-group"><label class="form-label">出库仓库</label><select class="form-select" id="q_id">'+opts+'</select></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">数量</label><input class="form-input" id="q_qty" type="number" inputmode="numeric" value="1" min="1"></div><div class="form-group"><label class="form-label">单位</label><input class="form-input" id="q_unit" value="'+esc(head.unit||'条')+'"></div></div>'+
+    '<div class="form-group"><label class="form-label">备注</label><input class="form-input" id="q_note" placeholder="客户/用途，可选"></div>'+
+    '<button class="btn btn-primary btn-block" onclick="doQuickOut()">确认出库</button>');
+}
+async function doQuickOut(){
+  const rid=document.getElementById('q_id').value,qty=parseInt(document.getElementById('q_qty').value)||0;
+  if(qty<=0){alert('数量必须大于0');return}
+  const r=await apiPost({action:'outbound',id:rid,qty,note:document.getElementById('q_note').value.trim()});
+  if(r.errorCode===0){_cache.items=null;_cache.hist=null;hideModal();toast('✅ 已出库 '+qty+' 条');render()}else alert(r.message||'失败');
+}
+// 右滑入库
+let _quickId=null;
+function quickIn(id){
+  _quickId=id;
+  const g=groupOf(id);if(!g)return;const head=g[0];
+  const whs=_cache.whs||[DEFAULT_WH];
+  const def=whName(head);
+  const opts=whs.map(w=>'<option value="'+esc(w)+'"'+(w===def?' selected':'')+'>'+esc(w)+'</option>').join('');
+  showModal('<div class="modal-header"><span class="modal-title">📥 入库 · '+esc(head.size)+'</span><button class="modal-close" onclick="hideModal()">✕</button></div>'+
+    '<div class="form-group"><label class="form-label">入库仓库</label><select class="form-select" id="qi_wh">'+opts+'</select></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="form-group"><label class="form-label">数量</label><input class="form-input" id="qi_qty" type="number" inputmode="numeric" value="1" min="1"></div><div class="form-group"><label class="form-label">单位</label><input class="form-input" id="qi_unit" value="'+esc(head.unit||'条')+'"></div></div>'+
+    '<button class="btn btn-primary btn-block" onclick="doQuickIn()">确认入库</button>');
+}
+async function doQuickIn(){
+  const id=_quickId,g0=groupOf(id);if(!g0){alert('数据异常');return}
+  const head=g0[0];
+  const qty=parseInt(document.getElementById('qi_qty').value)||0;
+  if(qty<=0){alert('数量必须大于0');return}
+  const r=await apiPost({action:'inbound',size:head.size,brand:head.brand||'',pattern:head.pattern||'',warehouse:document.getElementById('qi_wh').value,qty,unit:document.getElementById('qi_unit').value.trim()||'条',costPrice:head.costPrice||0,retailPrice:head.retailPrice||0,supplier:head.supplier||'',note:'快捷入库'});
+  if(r.errorCode===0){_cache.items=null;_cache.hist=null;hideModal();toast('✅ 已入库 '+qty+' 条');render()}else alert(r.message||'失败');
+}
+
+async function renderHist(container){
+  const history=await getHistory();
+  if(!history.length){container.innerHTML='<div class="card"><div class="empty"><div class="empty-icon">📝</div>暂无记录</div></div>';return}
+  let h='<div class="card">';
+  for(const x of history){
+    h+='<div class="hist-item"><div class="hist-icon '+(x.type==='in'?'hist-in':'hist-out')+'">'+(x.type==='in'?'📥':'📤')+'</div>';
+    h+='<div class="hist-info"><div><strong>'+(x.type==='in'?'入库':'出库')+'</strong> '+x.size+(x.brand?' - '+x.brand:'')+(x.pattern?' '+x.pattern:'')+' × '+x.qty+(x.warehouse?' <span style="font-size:11px;color:var(--accent)">['+esc(x.warehouse)+']</span>':'')+'</div>';
+    if(x.note)h+='<div style="color:var(--sub);font-size:12px">'+x.note+'</div>';
+    h+='<div class="hist-time">'+new Date(x.time).toLocaleString('zh-CN')+'</div></div></div>';
+  }
+  h+='</div>';
+  container.innerHTML=h;
+}
+
+async function renderUser(app){
+  const items=await getItems();
+  let h='<div class="card"><div class="usticky"><div class="card-header"><span style="font-size:22px">🛞</span><span class="card-title" id="userTitle" style="flex:1;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent">库存查询</span><span id="dlBtn" style="margin:0 8px;padding:5px 10px;border-radius:999px;border:1px solid #ea580c;background:#fff7ed;color:#ea580c;font-size:12px;font-weight:600;white-space:nowrap;cursor:pointer;-webkit-tap-highlight-color:transparent">APP下载</span><span style="text-align:right;font-size:11px;line-height:1.45;color:#64748b;white-space:nowrap">A任大小补胎搭电路空调<br><a href="tel:17754185168" style="color:var(--accent);font-size:14px;font-weight:700;text-decoration:none">17754185168</a></span></div>';
+  h+='<div class="search-bar" style="gap:6px;margin-bottom:0">'+sizeSelects(items,0).replace(/id="f_/g,'id="uf_')+'<span id="btn2ndU" style="flex:1;box-sizing:border-box;display:flex;align-items:center;justify-content:center;padding:10px 12px;font-size:15px;font-weight:400;border-radius:8px;border:1px solid var(--border);background:#fff;color:var(--fg);cursor:pointer;user-select:none;-webkit-user-select:none">二手</span></div></div>';
+  h+='<div id="uList"></div></div>';
+  app.innerHTML=h;
+  function paint2ndU(){const b=document.getElementById('btn2ndU');if(!b)return;if(filter2nd){b.style.borderColor='#ea580c';b.style.background='#ea580c';b.style.color='#fff';}else{b.style.borderColor='';b.style.background='#fff';b.style.color='';}}
+  function draw(){
+    paint2ndU();
+    const fw=parseInt(document.getElementById('uf_w').value)||0;
+    const fr=parseInt(document.getElementById('uf_r').value)||0;
+    const fd=parseInt(document.getElementById('uf_d').value)||0;
+    let f=items;
+    if(fw||fr||fd)f=f.filter(i=>{const k=tireKey(i.size);return(!fw||k[1]===fw)&&(!fr||k[2]===fr)&&(!fd||k[0]===fd);});
+    if(filter2nd)f=f.filter(i=>(i.brand||'')==='二手');
+    f=f.filter(function(i){return (+i.qty||0)>0;});
+    listMerged(document.getElementById('uList'),f.slice().sort(tireCmp),false,'暂无库存');
+  }
+  ['uf_w','uf_r','uf_d'].forEach(id=>document.getElementById(id).addEventListener('change',draw));
+  document.getElementById('btn2ndU').addEventListener('click',()=>{filter2nd=!filter2nd;draw();});
+  draw();
+  const _db=document.getElementById('dlBtn');if(_db)_db.addEventListener('click',showDlSheet);
+  let _tc=0,_tt=0;
+  const _ut=document.getElementById('userTitle');
+  if(_ut)_ut.addEventListener('click',function(){const n=Date.now();if(n-_tt>1500)_tc=0;_tt=n;_tc++;if(_tc>=5){_tc=0;location.href='/admin';}});
+}
+
+function showModal(c){
+  hideModal();
+  const o=document.createElement('div');o.className='modal-overlay';o.id='modalOverlay';
+  o.innerHTML='<div class="modal">'+c+'</div>';
+  o.addEventListener('click',e=>{if(e.target===o)hideModal()});
+  document.body.appendChild(o);
+}
+function hideModal(){const m=document.getElementById('modalOverlay');if(m)m.remove()}
+
+const DL_APK=location.origin+'/dl/TireStock.apk';
+const DL_IPA=location.origin+'/dl/TireStock.ipa';
+const QR_DATA='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbgAAAG4AQMAAAANBGDwAAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAABy0lEQVR4nO3bMXLCMBCFYXlSUHIEH4WjyUfjKD4CJQXDJlpppZUJBTMJMjP/q4i8nzpZ8toJgXx2pMstDy2uYBIJIfZlOBzuj1wrOfy4KY0v4aTXr+Erl0U59xPhcLjBLmrRRV2wW8CqE4nc01Bysw7fcDjc7ly33svGjcPh9u1c2UV/T7ZP43C4PTnLwUbzcfqo5+u6T1twONx45+Pc3DZuuyPU4HC4oe5pZr9xvxAcDvfvri3iVFZzDrZPa9KD8uo3bhwON9ClRJEyGvp+Vjewai0Oh9uDE5fah0456tDdV9QXwTgcbqCzh9y5jNayVYfrwKYxjcPhBrtYyur3GosW5PVeYg0uDQ6HG+5CKbvaz6hX/fL+5Xkah8ONdPaat2YpE6Xc20Tb8zUOhxvnUmap7av056mcr7sG1/NzOQ6He787lfX8cL4uDa4c/yIYh8ONc9tMbSL/GBzaHQGHw4120sX+20DLuu8jH/tZOBxunGtrvetD92VuvU84HG4HLupVt7yt7bxJnsj3oXE43K5cSv2uOb/3rcHhcHt0oZQ9fDBpFTgcbqyzHKxMykShrfec5+dyHA73TudT21dSPqvSyDY4HG6oI5+cb8BGPMGY2kJcAAAAAElFTkSuQmCC';
+function showDlSheet(){
+  hideModal();
+  const o=document.createElement('div');o.className='sheet-overlay';o.id='modalOverlay';
+  o.innerHTML='<div class="sheet"><div class="sheet-title">下载 App</div>'
+   +'<a class="sheet-item" href="'+DL_APK+'"><span class="si-ico">🤖</span><span class="si-txt">安卓 App<em>下载 APK，点击直接安装</em></span></a>'
+   +'<a class="sheet-item" href="'+DL_IPA+'"><span class="si-ico">🍎</span><span class="si-txt">苹果 App<em>下载 ipa，需用电脑签名安装</em></span></a>'
+   +'<div class="sheet-item" onclick="shareSite()"><span class="si-ico">🔗</span><span class="si-txt">分享此网站<em>转发给朋友或客户</em></span></div>'
+   +'<div class="sheet-cancel" onclick="hideModal()">取消</div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)hideModal()});
+  document.body.appendChild(o);
+}
+
+// ---------- 分享 ----------
+function shareUrl(){
+  var u=location.origin+location.pathname;
+  if(u.indexOf('http://')===0)u='https://'+u.slice(7);
+  if(u.indexOf('/admin')>=0)u=u.replace('/admin','');
+  return u;
+}
+function copySite(){
+  var u=shareUrl(),ok=false;
+  try{
+    var ta=document.createElement('textarea');ta.value=u;
+    ta.style.position='fixed';ta.style.top='-1000px';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.focus();ta.select();
+    try{ta.setSelectionRange(0,u.length)}catch(e){}
+    ok=document.execCommand('copy');document.body.removeChild(ta);
+  }catch(e){}
+  if(ok){toast('✅ 链接已复制');return}
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(u).then(function(){toast('✅ 链接已复制')}).catch(function(){prompt('长按复制链接',u)});return;
+  }
+  prompt('长按复制链接',u);
+}
+function nativeShare(){
+  var u=shareUrl();
+  if(navigator.share&&window.isSecureContext){
+    navigator.share({title:'轮胎库存查询',text:'手机随时查轮胎库存',url:u}).catch(function(){});return;
+  }
+  copySite();
+}
+function shareSite(){
+  var u=shareUrl();
+  if(window.TireApp&&window.TireApp.share){try{window.TireApp.share('轮胎库存查询',u);return}catch(e){}}
+  if(navigator.share&&window.isSecureContext){
+    navigator.share({title:'轮胎库存查询',text:'手机随时查轮胎库存',url:u}).catch(function(){});return;
+  }
+  showShareSheet(u);
+}
+function showShareSheet(u){
+  hideModal();
+  var wx=/MicroMessenger/i.test(navigator.userAgent);
+  var canShare=!!(navigator.share&&window.isSecureContext);
+  var tip=wx?'点右上角 ··· 选「发送给朋友」':(canShare?'可直接转发到微信、QQ 等 App':'长按二维码识别，或复制链接发给对方');
+  var o=document.createElement('div');o.className='sheet-overlay';o.id='modalOverlay';
+  o.innerHTML='<div class="sheet"><div class="sheet-title">分享给朋友 / 客户</div>'
+   +'<div class="share-box">'
+   +'<img class="share-qr" src="'+QR_DATA+'" alt="扫码打开">'
+   +'<div class="share-hint">'+tip+'</div>'
+   +'<div class="share-url"><span>'+u+'</span><b onclick="copySite()">复制</b></div>'
+   +'<div class="share-actions">'
+   +(canShare?'<button class="share-btn main" onclick="nativeShare()">转发到微信等 App</button>':'')
+   +'<button class="share-btn '+(canShare?'ghost':'main')+'" onclick="copySite()">复制链接</button>'
+   +'</div></div>'
+   +'<div class="sheet-cancel" onclick="hideModal()">取消</div></div>';
+  o.addEventListener('click',function(e){if(e.target===o)hideModal()});
+  document.body.appendChild(o);
+}
+
+// Init：无密码，按路径直接进入
+const path=location.pathname;
+role=(path==='/admin')?'admin':'user';
+document.getElementById('app').innerHTML='<div style="text-align:center;padding:80px 20px;color:var(--sub)"><div class="spinner" style="width:28px;height:28px;border-width:3px;color:var(--accent)"></div><div style="margin-top:14px;font-size:14px">加载中...</div></div>';
+render().catch(e=>{
+  document.getElementById('app').innerHTML='<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">📡</div><div style="font-weight:600;margin-bottom:8px">加载失败</div><div style="color:var(--danger);font-size:13px;margin-bottom:16px">'+(e.message||e)+'</div><button class="btn btn-primary" onclick="location.reload()">重新加载</button></div>';
+});
+</script>
+</body>
+</html>
