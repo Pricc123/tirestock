@@ -9,7 +9,7 @@ struct ContentView: View {
     @State private var loading = true
     @State private var failed = false
 
-    private let home = URL(string: "http://kucun.pricc.fun:8771")!
+    private let home = URL(string: "https://kucun.pricc.fun:8771")!
     private let backup = URL(string: "https://tire.pricc.fun")!
 
     var body: some View {
