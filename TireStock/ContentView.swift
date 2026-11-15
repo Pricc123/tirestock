@@ -9,7 +9,7 @@ struct ContentView: View {
     @State private var loading = true
     @State private var failed = false
 
-    private let home = URL(string: "https://kucun.pricc.fun:8771")!
+    private let home = URL(string: "http://kucun.pricc.fun:8771")!
     private let backup = URL(string: "https://tire.pricc.fun")!
 
     var body: some View {
@@ -90,6 +90,7 @@ struct WebContainer: UIViewRepresentable {
         weak var webView: WKWebView?
         private var observer: NSObjectProtocol?
         private var triedFallback = false
+        private var fallbackAt: Date?
 
         init(_ parent: WebContainer) {
             self.parent = parent
@@ -107,6 +108,7 @@ struct WebContainer: UIViewRepresentable {
 
         @objc func pullToRefresh(_ sender: UIRefreshControl) {
             triedFallback = false
+            fallbackAt = nil
             webView?.reload()
         }
 
@@ -134,10 +136,14 @@ struct WebContainer: UIViewRepresentable {
             if ns.code == NSURLErrorCancelled { return }
             if !triedFallback {
                 triedFallback = true
+                fallbackAt = Date()
                 parent.loading = true
+                parent.failed = false
                 webView.load(URLRequest(url: parent.fallback))
                 return
             }
+            // 刚切到备用线路的 10 秒内不判定失败，避免重复回调误报
+            if let t = fallbackAt, Date().timeIntervalSince(t) < 10 { return }
             parent.loading = false
             parent.failed = true
             webView.scrollView.refreshControl?.endRefreshing()
