@@ -9,12 +9,13 @@ struct ContentView: View {
     @State private var loading = true
     @State private var failed = false
 
-    private let home = URL(string: "https://tire.pricc.fun")!
+    private let home = URL(string: "http://kucun.pricc.fun:8771")!
+    private let backup = URL(string: "https://tire.pricc.fun")!
 
     var body: some View {
         ZStack(alignment: .top) {
             Color.white.ignoresSafeArea()
-            WebContainer(url: home, loading: $loading, failed: $failed)
+            WebContainer(url: home, fallback: backup, loading: $loading, failed: $failed)
                 .ignoresSafeArea(edges: .bottom)
 
             if loading && !failed {
@@ -51,6 +52,7 @@ struct ContentView: View {
 
 struct WebContainer: UIViewRepresentable {
     let url: URL
+    let fallback: URL
     @Binding var loading: Bool
     @Binding var failed: Bool
 
@@ -87,6 +89,7 @@ struct WebContainer: UIViewRepresentable {
         var parent: WebContainer
         weak var webView: WKWebView?
         private var observer: NSObjectProtocol?
+        private var triedFallback = false
 
         init(_ parent: WebContainer) {
             self.parent = parent
@@ -103,6 +106,7 @@ struct WebContainer: UIViewRepresentable {
         }
 
         @objc func pullToRefresh(_ sender: UIRefreshControl) {
+            triedFallback = false
             webView?.reload()
         }
 
@@ -117,12 +121,23 @@ struct WebContainer: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
-            parent.loading = false
-            parent.failed = true
-            webView.scrollView.refreshControl?.endRefreshing()
+            handleFailure(webView, error)
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            handleFailure(webView, error)
+        }
+
+        /// 直连线路不通时自动切回 Cloudflare 隧道
+        private func handleFailure(_ webView: WKWebView, _ error: Error) {
+            let ns = error as NSError
+            if ns.code == NSURLErrorCancelled { return }
+            if !triedFallback {
+                triedFallback = true
+                parent.loading = true
+                webView.load(URLRequest(url: parent.fallback))
+                return
+            }
             parent.loading = false
             parent.failed = true
             webView.scrollView.refreshControl?.endRefreshing()
