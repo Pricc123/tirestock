@@ -194,6 +194,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				INFOPLIST_KEY_NSCameraUsageDescription = "\U62cd\U6444\U8f6e\U80ce\U7167\U7247\U3001\U626b\U63cf\U89c4\U683c";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\U5f55\U5236\U89c6\U9891\U65f6\U4f7f\U7528\U9ea6\U514b\U98ce";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "\U4fdd\U5b58\U56fe\U7247\U5230\U76f8\U518c";
@@ -223,6 +224,7 @@
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				INFOPLIST_KEY_NSCameraUsageDescription = "\U62cd\U6444\U8f6e\U80ce\U7167\U7247\U3001\U626b\U63cf\U89c4\U683c";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "\U5f55\U5236\U89c6\U9891\U65f6\U4f7f\U7528\U9ea6\U514b\U98ce";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "\U4fdd\U5b58\U56fe\U7247\U5230\U76f8\U518c";

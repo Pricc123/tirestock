@@ -3,20 +3,17 @@ name: Build unsigned IPA
 on:
   workflow_dispatch:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   build:
-    runs-on: macos-15
-    timeout-minutes: 30
+    runs-on: macos-14
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Show toolchain
-        run: |
-          xcodebuild -version
-          xcrun --sdk iphoneos --show-sdk-version
+      - name: Show Xcode version
+        run: xcodebuild -version
 
       - name: Build app
         run: |
@@ -26,12 +23,11 @@ jobs:
             -scheme TireStock \
             -configuration Release \
             -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
-            build 2>&1 | tail -60
+            build | tail -40
 
       - name: Package ipa
         run: |
@@ -39,7 +35,6 @@ jobs:
           cp -R "build/Build/Products/Release-iphoneos/TireStock.app" Payload/
           zip -qry TireStock-unsigned.ipa Payload
           ls -lh TireStock-unsigned.ipa
-          /usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" Payload/TireStock.app/Info.plist || true
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
